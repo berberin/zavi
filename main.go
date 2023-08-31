@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 func RerollMiddleware(urlPrefix, spaDirectory string) gin.HandlerFunc {
@@ -26,7 +30,11 @@ func RerollMiddleware(urlPrefix, spaDirectory string) gin.HandlerFunc {
 }
 
 func main() {
+	pflag.IntP("port", "p", 9000, "port")
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
 	r := gin.Default()
-	r.Use(RerollMiddleware("/", "./build/web"))
-	r.Run()
+	r.Use(RerollMiddleware("/", os.Args[1]))
+	r.Run(fmt.Sprintf(":%d", viper.GetInt("port")))
 }
